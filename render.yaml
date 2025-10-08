@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: n8n
+    env: docker
+    plan: free
+    autoDeploy: true
+    dockerfilePath: ./Dockerfile
+
+    # Persistent storage (same as Docker volume)
+    disk:
+      name: n8n_data
+      mountPath: /home/node/.n8n
+      sizeGB: 1
+
+    envVars:
+      - key: WEBHOOK_URL
+        value: "https://{{render-deployment-url}}"
+      - key: GENERIC_TIMEZONE
+        value: "Africa/Algiers"
+      - key: NODE_ENV
+        value: "production"
+      - key: N8N_PORT
+        value: "5678"
+      - key: N8N_LOG_LEVEL
+        value: "info"

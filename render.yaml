@@ -1,15 +1,11 @@
 services:
   - type: web
     name: n8n
-    env: docker
     plan: free
+    runtime: image
+    image:
+      url: docker.io/n8nio/n8n:latest
     autoDeploy: true
-    dockerfilePath: ./Dockerfile
-
-    disk:
-      name: n8n_data
-      mountPath: /home/node/.n8n
-      sizeGB: 1
 
     envVars:
       - key: N8N_BASIC_AUTH_ACTIVE
@@ -17,25 +13,51 @@ services:
       - key: N8N_BASIC_AUTH_USER
         value: "admin"
       - key: N8N_BASIC_AUTH_PASSWORD
-        sync: false # store securely in Render UI
+        sync: false # Add manually in Render later
+      - key: GENERIC_TIMEZONE
+        value: "Africa/Algiers"
+      - key: NODE_ENV
+        value: "production"
 
-      # ✅ Important: Tell n8n its real public URL
+      # Public URL for webhook generation
       - key: WEBHOOK_URL
         value: "https://{{render-deployment-url}}"
-
-      # ✅ Optional but safer (explicit host/protocol)
       - key: N8N_HOST
         value: "{{render-deployment-url}}"
       - key: N8N_PROTOCOL
         value: "https"
 
-      - key: GENERIC_TIMEZONE
-        value: "Africa/Algiers"
-      - key: NODE_ENV
-        value: "production"
-      - key: N8N_PORT
-        value: "5678"
+      # Database connection auto-filled by Render
+      - key: DB_TYPE
+        value: postgresdb
+      - key: DB_POSTGRESDB_DATABASE
+        fromDatabase:
+          name: n8n-db
+          property: database
+      - key: DB_POSTGRESDB_HOST
+        fromDatabase:
+          name: n8n-db
+          property: host
+      - key: DB_POSTGRESDB_PASSWORD
+        fromDatabase:
+          name: n8n-db
+          property: password
+      - key: DB_POSTGRESDB_USER
+        fromDatabase:
+          name: n8n-db
+          property: user
+      - key: DB_POSTGRESDB_PORT
+        fromDatabase:
+          name: n8n-db
+          property: port
+
+      # Encrypt sensitive credentials in DB
+      - key: N8N_ENCRYPTION_KEY
+        generateValue: true
+
       - key: N8N_LOG_LEVEL
         value: "info"
-      - key: N8N_USER_FOLDER
-        value: "/home/node/.n8n"
+
+databases:
+  - name: n8n-db
+    plan: free

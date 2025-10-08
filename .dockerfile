@@ -7,4 +7,3 @@ ENV TZ=Africa/Algiers
 
 # Expose n8n port
 EXPOSE 5678
-
